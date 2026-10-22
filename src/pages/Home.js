@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import pizza from "../images/pizza.webp";
 import burger from "../images/burger.webp";
@@ -13,6 +13,14 @@ import "../App.css";
 
 function Home() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [favorites, setFavorites] = useState(() => {
+    const savedFavorites = localStorage.getItem("favorites");
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
+  }, [favorites]);
   const recipes = [
     {
       name: "Cheese Pizza",
@@ -80,6 +88,9 @@ function Home() {
             🍲 Recipe Finder
           </a>
           <span className="text-white">Discover Delicious Recipe</span>
+          <Link to="/favorites" className="btn btn-outline-danger">
+            ❤️ My Favorites
+          </Link>
         </div>
       </nav>
       <div className="container text-center my-5">
@@ -117,6 +128,26 @@ function Home() {
                 />
                 <div className="card-body">
                   <h5 className="card-title">{recipe.name}</h5>
+                  <button
+                    className="btn btn-outline-danger btn-sm mb-2"
+                    onClick={() => {
+                      const isFavorite = favorites.some(
+                        (fav) => fav.name === recipe.name,
+                      );
+
+                      if (isFavorite) {
+                        setFavorites(
+                          favorites.filter((fav) => fav.name !== recipe.name),
+                        );
+                      } else {
+                        setFavorites([...favorites, recipe]);
+                      }
+                    }}
+                  >
+                    {favorites.some((fav) => fav.name === recipe.name)
+                      ? "❤️ Remove Favorite"
+                      : "🤍 Add to Favorites"}
+                  </button>
                   <p className="card-text">{recipe.description}</p>
                   <p className="card-text">
                     Cooking Time: {recipe.cookingTime}
